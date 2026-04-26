@@ -25,6 +25,8 @@ namespace task.Controllers
         [HttpGet("GetTerminalsByCityAndRegion")]
         [ProducesResponseType<Office>(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status499ClientClosedRequest)]
+        [ProducesResponseType(StatusCodes.Status504GatewayTimeout)]
         public async Task<IActionResult> GetTerminalsByCityAndRegion([FromQuery] string city, [FromQuery] string region,
             CancellationToken stoppingToken = default)
         {
@@ -33,6 +35,14 @@ namespace task.Controllers
             try
             {
                 offices = await searchService.GetTerminalsByCityAndRegion(city, region, stoppingToken);
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                return StatusCode(499);
+            }
+            catch (OperationCanceledException)
+            {
+                return StatusCode(504, "Timeout");
             }
             catch (Exception ex)
             {
@@ -53,6 +63,8 @@ namespace task.Controllers
         [ProducesResponseType<Office>(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status499ClientClosedRequest)]
+        [ProducesResponseType(StatusCodes.Status504GatewayTimeout)]
         public async Task<IActionResult> GetCityIdByCityNameAndRegion([FromQuery] string cityName, [FromQuery] string region, 
             CancellationToken stoppingToken = default)
         {
@@ -61,6 +73,14 @@ namespace task.Controllers
             try
             {
                 id = await searchService.GetCityIdByCityNameAndRegion(cityName, region, stoppingToken);
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                return StatusCode(499);
+            }
+            catch (OperationCanceledException)
+            {
+                return StatusCode(504, "Timeout");
             }
             catch (Exception ex)
             {

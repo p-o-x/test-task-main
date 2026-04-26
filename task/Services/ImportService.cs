@@ -24,13 +24,13 @@ namespace task.Services
             PropertyNameCaseInsensitive = true 
         };
 
-        public async Task ImportDataToDb(CancellationToken cancellationToken = default)
+        public async Task ImportDataToDb(CancellationToken stoppingToken = default)
         {
             logger.LogInformation("Удаление старых записей");
-            await db.Offices.ExecuteDeleteAsync(cancellationToken);
+            await db.Offices.ExecuteDeleteAsync(stoppingToken);
             logger.LogInformation("Начато получение данных");
 
-            var cities = await FetchResults(cancellationToken);
+            var cities = await FetchResults(stoppingToken);
 
             logger.LogInformation($"Получена информация по {cities.Count} городам");
 
@@ -38,16 +38,16 @@ namespace task.Services
 
             logger.LogInformation($"Информация приведена в нужный формат, получено {offices.Count} офисов");
 
-            await db.Offices.AddRangeAsync(offices, cancellationToken);
+            await db.Offices.AddRangeAsync(offices, stoppingToken);
 
-            var count = await db.SaveChangesAsync(cancellationToken);
+            var count = await db.SaveChangesAsync(stoppingToken);
 
-            logger.LogInformation($"В бд добавлено {count} сущностей");
+            logger.LogInformation($"В бд добавлено {count} сущностей");            
         }
 
-        private async Task<List<City>> FetchResults(CancellationToken cancellationToken = default)
+        private async Task<List<City>> FetchResults(CancellationToken stoppingToken = default)
         {
-            var json = await File.ReadAllTextAsync("files/terminals.json", cancellationToken);
+            var json = await File.ReadAllTextAsync("files/terminals.json", stoppingToken);
             var data = JsonSerializer.Deserialize<Rootobject>(json, jsonSerializerOptions);
 
             if (data == null)
